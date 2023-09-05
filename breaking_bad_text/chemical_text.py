@@ -10,11 +10,8 @@ test_text_1 = [
     "Created by Vince Gilligan"
 ]
 
-test_text_2 = ["breaking bad", "Created by Vince Gilligan."]
-
-test_text_3 = ["This"]
-
 output_list =  break_it_bad(test_text_1)
 
-for list in output_list:
-    print(list)
+for each_line in output_list:
+    print(each_line)
+
