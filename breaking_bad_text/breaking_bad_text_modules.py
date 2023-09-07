@@ -1,7 +1,8 @@
 import random
 
 words_to_ignore_list = ["a", "for", "is", "by", "to", "from", "I", "in", "written",
-                        "created", "directed", "starring", "the", "be", "it", "of"]
+                        "created", "directed", "starring", "the", "be", "it", "of",
+                        "guest", "edited", "director", "photography", "music", "casting"]
 
 elements_list = [
     'Ac', 'Ag', 'Al', 'Am', 'Ar', 'As', 'At', 'Au', 'B', 'Ba',

@@ -6,23 +6,29 @@ elements_dict_lower = {}
 for each_element in elements_list:
     elements_dict_lower[str(each_element.lower())] = False
 
-test_text_1 = [
-    "This is the test text.", "It contains lines of text.",
-    "Please use this to check.",
-    "This is Purple Parents - can be Fevered Little shilas.",
-    "Gaps in germs pootle labour sensing titles.",
+titles_text = [
     "Breaking Bad",
     "Created by Vince Gilligan",
-    "Fertile Fecal Frank France"
+    "Bryan Cranston",
+    "Anna Gunn",
+    "Aaron Paul",
+    "Dean Norris",
+    "Betsy Brandt",
+    "RJ Mittie",
+    "Bob Odenkirk",
+    "Giancarlo Esposito",
+    "Jonathan Banks",
+    "Guest Starring \n Nigel Gibbs",
+    "Edited by \n Skip Macdonald",
+    "Production Designer \n Mark Freeborn",
+    "Director of Photography \n Nelson Cragg",
+    "Music by \n Dave Porter",
+    "Casting by \n Sharon Bialy C.S.A \n Sherry Thomas C.S.A"
 ]
-
-# This is Purple Parents -
-
-test_text_2 = ["This is the test text."]
 
 max_words_to_change = 2  # set the max value for words to format
 
-output_list = break_it_bad(test_text_1, max_words_to_change)
+output_list = break_it_bad(titles_text, max_words_to_change)
 
 
 for each_line in output_list:
