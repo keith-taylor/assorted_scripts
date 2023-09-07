@@ -6,7 +6,7 @@ Each script will have its own folder and README.
 
 #### Installation
 
-Clone from: git@github.com:keith-taylor/assorted_scripts.git
+Clone from: `git@github.com:keith-taylor/assorted_scripts.git`
 
 #### Contact
 
