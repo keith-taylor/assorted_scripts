@@ -2,7 +2,7 @@ import random
 
 words_to_ignore_list = ["a", "for", "is", "by", "to", "from", "I", "in", "written",
                         "created", "directed", "starring", "the", "be", "it", "of",
-                        "guest", "edited", "director", "photography", "music", "casting"]
+                        "guest", "edited", "director", "photography", "music", "casting", "C.S.A."]
 
 elements_list = [
     'Ac', 'Ag', 'Al', 'Am', 'Ar', 'As', 'At', 'Au', 'B', 'Ba',
@@ -39,7 +39,7 @@ def break_it_bad(input_text, max_words_to_change):
     for each_line in input_text:  # process each string found in the input list
         processed_text, elements_matched = process_lines_of_text(each_line, max_words_to_change, elements_matched)
         output_text.append(processed_text)
-    print(elements_matched)
+
     return output_text
 
 
@@ -109,34 +109,26 @@ def process_words_into_chars(input_word, elements_matched):
     # try: 2 chars, unused matches only (if match already used in this line, skip it)
     for i in range(1, len(chars_in_each_word)):  # get a 2 char search term
         search_chars = chars_in_each_word[i - 1] + chars_in_each_word[i]
-        print(f"2 char, unmatched only, search term is: {search_chars}")
         if search_chars.lower() not in elements_matched:  # try novel matches only
             match_found, matched_element = is_element(search_chars)
             if match_found is True:
-                print(f"Unused match found: {search_chars}")
                 elements_matched.append(search_chars.lower())
-                print(f"elements_matched updated: {elements_matched}")
                 # exit with a match (if found)
                 return (format_word(input_word, search_chars, matched_element), match_found,
                         matched_element, elements_matched)
 
     for i in range(0, len(chars_in_each_word)):  # try a one char match
         search_chars = chars_in_each_word[i]
-        print(f"1 char matches, search term is: {search_chars}")
         match_found, matched_element = is_element(search_chars)
         if match_found is True:
-            print(f"1 char match found: {search_chars}")
             elements_matched.append(search_chars.lower())
-            print(f"elements_matched updated: {elements_matched}")
             return (format_word(input_word, search_chars, matched_element), match_found,
                     matched_element, elements_matched)
 
     for i in range(1, len(chars_in_each_word)):  # get a 2 char search term
         search_chars = chars_in_each_word[i - 1] + chars_in_each_word[i]
-        print(f"2 char, any match, search term is: {search_chars}")
         match_found, matched_element = is_element(search_chars)
         if match_found is True:
-            print(f"2 char match found: {search_chars}")
             elements_matched.append(search_chars.lower())
             # exit with a match (if found)
             return (format_word(input_word, search_chars, matched_element), match_found,
