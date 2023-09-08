@@ -34,5 +34,3 @@ output_list = break_it_bad(titles_text, max_words_to_change)
 for each_line in output_list:
     print(each_line)
     time.sleep(0.75)
-
-

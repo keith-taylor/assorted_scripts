@@ -35,16 +35,20 @@ def break_it_bad(input_text, max_words_to_change):
     :return output_text: a formatted list of: strings and lists_of_strings
     """
     output_text = []
+    elements_matched = []  # a list to contain any matches made in this line of text
     for each_line in input_text:  # process each string found in the input list
-        output_text.append(process_lines_of_text(each_line, max_words_to_change))
+        processed_text, elements_matched = process_lines_of_text(each_line, max_words_to_change, elements_matched)
+        output_text.append(processed_text)
+    print(elements_matched)
     return output_text
 
 
-def process_lines_of_text(input_line_of_text, max_words_to_change):
+def process_lines_of_text(input_line_of_text, max_words_to_change, elements_matched):
     """
     Takes a line of text as a string and breaks this into a list of words.
     Each word in the list is then send to word_scan() (in random order) and each returned word is used to
     re-assembled the string (but now including any formatting changes) which is then returned to the calling function.
+    :param elements_matched: the list containing any matches made
     :param input_line_of_text: a string
     :param max_words_to_change: how many formatting changes should be made in each line of text
     :return: output_line_of_text reassembled text with formatting changes
@@ -57,7 +61,7 @@ def process_lines_of_text(input_line_of_text, max_words_to_change):
 
     output_line_as_text = ""
     words_changed = 0  # a count of words changed in each line being processed
-    elements_matched = []  # a list to contain any matches made in this line of text
+
     input_line_as_list = input_line_of_text.split()  # creates a list containing the words from this line of text
     output_line_as_list = [None] * len(input_line_as_list)  # a list to contain the output as received from word_scan
 
@@ -73,22 +77,22 @@ def process_lines_of_text(input_line_of_text, max_words_to_change):
         word = input_line_as_list[i]
         # just add the word to the list without processing if any of below are true:
         if (word.lower() in words_to_ignore_list) or (words_changed == max_words_to_change) or len(word) < 2:
-            output_line_as_list[i] = input_line_as_list[i]  # use the original word
+            output_line_as_list[i] = input_line_as_list[i]  # skip processing & use the unformatted word
         else:
-            # send the word to be processed into chars
+            # send the word to be processed
             word, match_found, matched_element, elements_matched = process_words_into_chars(word, elements_matched)
             # was the word matched to a chemical element and reformatted?
             if match_found is True:
                 words_changed += 1
-                output_line_as_list[i] = word  # use the reformatted word
+                output_line_as_list[i] = word  # use the newly formatted word
             else:
-                output_line_as_list[i] = input_line_as_list[i]  # use the original word
+                output_line_as_list[i] = input_line_as_list[i]  # use the unformatted word
 
     # change from a list strings back to a string
     for word in output_line_as_list:
         output_line_as_text += word + " "
 
-    return output_line_as_text
+    return output_line_as_text, elements_matched
 
 
 def process_words_into_chars(input_word, elements_matched):
@@ -105,31 +109,34 @@ def process_words_into_chars(input_word, elements_matched):
     # try: 2 chars, unused matches only (if match already used in this line, skip it)
     for i in range(1, len(chars_in_each_word)):  # get a 2 char search term
         search_chars = chars_in_each_word[i - 1] + chars_in_each_word[i]
+        print(f"2 char, unmatched only, search term is: {search_chars}")
         if search_chars.lower() not in elements_matched:  # try novel matches only
             match_found, matched_element = is_element(search_chars)
             if match_found is True:
+                print(f"Unused match found: {search_chars}")
                 elements_matched.append(search_chars.lower())
+                print(f"elements_matched updated: {elements_matched}")
                 # exit with a match (if found)
                 return (format_word(input_word, search_chars, matched_element), match_found,
                         matched_element, elements_matched)
 
     for i in range(0, len(chars_in_each_word)):  # try a one char match
         search_chars = chars_in_each_word[i]
+        print(f"1 char matches, search term is: {search_chars}")
         match_found, matched_element = is_element(search_chars)
         if match_found is True:
+            print(f"1 char match found: {search_chars}")
             elements_matched.append(search_chars.lower())
+            print(f"elements_matched updated: {elements_matched}")
             return (format_word(input_word, search_chars, matched_element), match_found,
                     matched_element, elements_matched)
-        else:  # if no matches found after all 3 attempts return input as output
-            matched_element = None
-            match_found = False
-            # exit with a match (if found)
-            return input_word, match_found, matched_element, elements_matched
 
     for i in range(1, len(chars_in_each_word)):  # get a 2 char search term
         search_chars = chars_in_each_word[i - 1] + chars_in_each_word[i]
+        print(f"2 char, any match, search term is: {search_chars}")
         match_found, matched_element = is_element(search_chars)
         if match_found is True:
+            print(f"2 char match found: {search_chars}")
             elements_matched.append(search_chars.lower())
             # exit with a match (if found)
             return (format_word(input_word, search_chars, matched_element), match_found,
