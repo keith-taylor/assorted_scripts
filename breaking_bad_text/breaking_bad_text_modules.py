@@ -1,8 +1,11 @@
 import random
 
-words_to_ignore_list = ["a", "for", "is", "by", "to", "from", "I", "in", "written",
-                        "created", "directed", "starring", "the", "be", "it", "of",
-                        "guest", "edited", "director", "photography", "music", "casting", "C.S.A."]
+# NOTE: all entries in this list must be lower case. It is searched using word.lower()!!!
+words_to_ignore_list = [
+ 'a', 'be', 'by', 'for', 'from', 'I', 'in', 'is', 'it', 'of', 'the', 'to',
+ 'casting', 'created', 'c.s.a.', 'designer', 'directed', 'director', 'edited',
+ 'guest',  'music', 'photography', 'production', 'starring', 'written'
+]
 
 elements_list = [
     'Ac', 'Ag', 'Al', 'Am', 'Ar', 'As', 'At', 'Au', 'B', 'Ba',
