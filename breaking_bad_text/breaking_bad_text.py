@@ -23,8 +23,7 @@ titles_text = [
     "Production Designer \n Mark Freeborn",
     "Director of Photography \n Nelson Cragg",
     "Music by \n Dave Porter",
-    "Casting by \n Sharon Baily C.S.A. \n Sherry Thomas C.S.A."
-]
+    "Casting by \n Sharon Baily C.S.A. \n Sherry Thomas C.S.A."]
 
 max_words_to_change = 2  # set the max value for words to format
 
