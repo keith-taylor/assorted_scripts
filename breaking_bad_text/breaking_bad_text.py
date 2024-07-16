@@ -2,10 +2,6 @@ from breaking_bad_text_modules import *
 from rich import print
 import time
 
-elements_dict_lower = {}
-for each_element in elements_list:
-    elements_dict_lower[str(each_element.lower())] = False
-
 titles_text = [
     "Breaking Bad",
     "Created by Vince Gilligan",
@@ -27,9 +23,8 @@ titles_text = [
 
 max_words_to_change = 2  # set the max value for words to format
 
-output_list = break_it_bad(titles_text, max_words_to_change)
-
+output_list, elements_matched = break_it_bad(titles_text, max_words_to_change)
 
 for each_line in output_list:
     print(each_line)
-    time.sleep(0.75)
+    time.sleep(0.66)
