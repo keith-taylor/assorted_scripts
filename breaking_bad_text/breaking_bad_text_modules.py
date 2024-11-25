@@ -1,11 +1,12 @@
 import random
+from typing import List, Tuple, Optional 
 
-# NOTE: all entries in this list must be lower case. It is searched using word.lower()!!!
 words_to_ignore_list = [
  'a', 'be', 'by', 'for', 'from', 'I', 'in', 'is', 'it', 'of', 'the', 'to',
- 'casting', 'created', 'c.s.a.', 'designer', 'directed', 'director', 'edited',
+ 'casting', 'created', 'c.s.a.', 'Designer', 'directed', 'Director', 'edited',
  'guest',  'music', 'photography', 'production', 'starring', 'written'
 ]
+
 
 elements_list = [
     'Ac', 'Ag', 'Al', 'Am', 'Ar', 'As', 'At', 'Au', 'B', 'Ba',
@@ -22,12 +23,18 @@ elements_list = [
     'Uut', 'V', 'W', 'Xe', 'Y', 'Yb', 'Zn', 'Zr'
 ]
 
-elements_list_lower = []
-for each_element in elements_list:
-    elements_list_lower.append(each_element.lower())
+def convert_list_of_strings_to_lower(input_list: List[str]) -> List[str]:
+    output_list_as_lower: List[str]  = []
+    for each_element in input_list:
+            output_list_as_lower.append(str(each_element.lower()))
+    return output_list_as_lower
+
+# convert to lower case to match case of search terms used 
+elements_list_lower = convert_list_of_strings_to_lower(elements_list)
+words_to_ignore_list_lower = convert_list_of_strings_to_lower(words_to_ignore_list)
 
 
-def break_it_bad(input_text, max_words_to_change):
+def break_it_bad(input_text: List[str], max_words_to_change: int):
     """
     Takes a list of strings and returns them with formatting
     that is reminiscent of the Breaking Bad TV series title sequence.
@@ -37,140 +44,167 @@ def break_it_bad(input_text, max_words_to_change):
     :param input_text: a list of strings
     :return output_text: a formatted list of: strings and lists_of_strings
     """
-    output_text = []
-    elements_matched = []  # a list to contain any matches made in this line of text
+    output_text: List[str] = []
+    elements_matched: List[str] = []  # a list of any elements matched in this line of text
     for each_line in input_text:  # process each string found in the input list
-        processed_text, elements_matched = process_lines_of_text(each_line, max_words_to_change, elements_matched)
+        processed_text, elements_matched = lines_into_words(each_line, max_words_to_change, elements_matched)
         output_text.append(processed_text)
+    return output_text, elements_matched
 
-    return output_text
 
-
-def process_lines_of_text(input_line_of_text, max_words_to_change, elements_matched):
+def lines_into_words(input_line_string: str, max_words_to_change: int, 
+                          elements_matched: List[str]) -> Tuple[str, List[str]]:
     """
     Takes a line of text as a string and breaks this into a list of words.
-    Each word in the list is then send to word_scan() (in random order) and each returned word is used to
-    re-assembled the string (but now including any formatting changes) which is then returned to the calling function.
+    Generates a randomised index list (word_sequence) to sequence the order in which the words are processed.
+    Each word in the list is sent, as per 'word_sequence', to 'words_into_chars()' and each returned word is used to
+    re-assembled the string (now including any formatting changes) which is then returned.
     :param elements_matched: the list containing any matches made
-    :param input_line_of_text: a string
+    :param input_line_string: a string
     :param max_words_to_change: how many formatting changes should be made in each line of text
-    :return: output_line_of_text reassembled text with formatting changes
+    :return: output_line_string: text with formatting changes
+    :return: elements_matched: a list of matched elements (str)
     """
-    # go through each word in this line of text and...
-    #   send each word to 'word_scan' unless we have two reformatted words already, or...
-    #       the word is in the `ignore_list` or the word is too small (<2 chars).
-    # each word, scanned and re-formatted (or not) is re-added to the output_line_as_list.
-    # This is rebuilt into a string and returned.
+    
+    output_line_string: str = ""
+    num_words_changed: int = 0  # a count of words changed in each line being processed
 
-    output_line_as_text = ""
-    words_changed = 0  # a count of words changed in each line being processed
-
-    input_line_as_list = input_line_of_text.split()  # creates a list containing the words from this line of text
-    output_line_as_list = [None] * len(input_line_as_list)  # a list to contain the output as received from word_scan
+    input_line_word_list: List[str] = input_line_string.split()  # creates a list containing the words from this line of text
+    output_line_word_list: List[str] = [""] * len(input_line_word_list)  # a list to contain the output as received from word_scan
 
     # creates a list of random indexes (matching the number of words in the input text)
-    search_order_list = generate_search_order_list(len(input_line_as_list))
+    word_sequence = generate_word_sequence(len(input_line_word_list))
 
-    # iterate through the random indexes in search order list to grab each word in turn
-    # check if we should bypass processing for this word
-    # if not, send the word to the function `process_words_into_chars`
-    # either way the input or output word is added into output_line_as_list to re-create the text
-    for i in search_order_list:
+    # Iterate through the random indexes in word_sequence to grab each word in turn and...
+    #   check if we should bypass processing for this word, or, if not...
+    #       send the word to `words_into_chars`.
+    # The word (potentially with formatting changes) is added into `output_line_string` to re-create the text.
+    for i in word_sequence:
         # get each word in turn
-        word = input_line_as_list[i]
-        # just add the word to the list without processing if any of below are true:
-        if (word.lower() in words_to_ignore_list) or (words_changed == max_words_to_change) or len(word) < 2:
-            output_line_as_list[i] = input_line_as_list[i]  # skip processing & use the unformatted word
-        else:
-            # send the word to be processed
-            word, match_found, matched_element, elements_matched = process_words_into_chars(word, elements_matched)
-            # was the word matched to a chemical element and reformatted?
-            if match_found is True:
-                words_changed += 1
-                output_line_as_list[i] = word  # use the newly formatted word
-            else:
-                output_line_as_list[i] = input_line_as_list[i]  # use the unformatted word
+        word: str = input_line_word_list[i]
+        if not ((word.lower() in words_to_ignore_list) or (num_words_changed == max_words_to_change) or len(word) < 2):
+            # If none of these condition are true...
+            #   then send the word to be processed into chars and checked against the elements list for matches
+            word, char_match_found, elements_matched = words_into_chars(word, elements_matched)
+            if char_match_found is True: # Were chars in the word changed?
+                num_words_changed += 1
+        output_line_word_list[i] = word # update the output
+        
+    # Change from a list of strings back to a string
+    for word in output_line_word_list:
+        output_line_string += word + " "
 
-    # change from a list strings back to a string
-    for word in output_line_as_list:
-        output_line_as_text += word + " "
-
-    return output_line_as_text, elements_matched
+    return output_line_string, elements_matched
 
 
-def process_words_into_chars(input_word, elements_matched):
-    # takes a word as an argument and breaks it into a list of letters.
-    # The list is then used as input for a search...
-    #       for one letter and two-letter matches in elements_list_lower
-    # a preference is given to two letter matches (this search is done first)
-    # the word's capitalisation is changed to show the elements and returned to the calling function
-
-    # convert words into chars
-    chars_in_each_word = [letter for letter in input_word]
-
-    # iterate over combination of sequential chars
-    # try: 2 chars, unused matches only (if match already used in this line, skip it)
-    for i in range(1, len(chars_in_each_word)):  # get a 2 char search term
-        search_chars = chars_in_each_word[i - 1] + chars_in_each_word[i]
+def words_into_chars(input_word: str, elements_matched: List[str]) -> Tuple[str, bool, List[str]]:
+    """
+    Takes a text string and breaks this into a list of chars which is then used to generate 2-letter 
+    and 1-letter search terms that are sent to is_element to check if they are indeed elements.
+    The following preferences are given: 2-char un-used matches, 1-char un-used matches,
+    2-char previously used matches, 1-char previously used matches.
+    Where matches are mader char formatting is changed to reflect this before the string is returned.
+    :param input_word: string to broken down into chars
+    :param elements_matched: a list of strings containing any matches made
+    :return: word: input string (that may or may not be reformatted)
+    :return: char_match_found: bool
+    :return: elements_matched, a list of all elements that have been matched
+    """
+    
+    # convert the input into a list of chars
+    list_of_chars: List[str] = [letter for letter in input_word]
+    
+    # Try for unused (not already listed in elements_matched) 2-char matches
+    for i in range(1, len(list_of_chars)):  # get a 2 char search term
+        search_chars: str = list_of_chars[i - 1] + list_of_chars[i]
         if search_chars.lower() not in elements_matched:  # try novel matches only
-            match_found, matched_element = is_element(search_chars)
-            if match_found is True:
+            char_match_found, matched_element = is_element(search_chars)
+            if char_match_found is True:
                 elements_matched.append(search_chars.lower())
                 # exit with a match (if found)
-                return (format_word(input_word, search_chars, matched_element), match_found,
-                        matched_element, elements_matched)
+                return (format_word(input_word, search_chars), char_match_found,
+                        elements_matched)
 
-    for i in range(0, len(chars_in_each_word)):  # try a one char match
-        search_chars = chars_in_each_word[i]
-        match_found, matched_element = is_element(search_chars)
-        if match_found is True:
-            elements_matched.append(search_chars.lower())
-            return (format_word(input_word, search_chars, matched_element), match_found,
-                    matched_element, elements_matched)
-
-    for i in range(1, len(chars_in_each_word)):  # get a 2 char search term
-        search_chars = chars_in_each_word[i - 1] + chars_in_each_word[i]
-        match_found, matched_element = is_element(search_chars)
-        if match_found is True:
+    # Try for unused (not already listed in elements_matched) 1-char matches
+    for i in range(0, len(list_of_chars)):  # try a one char match
+        search_chars: str = list_of_chars[i]
+        if search_chars.lower() not in elements_matched:  # try novel matches only
+            char_match_found, matched_element = is_element(search_chars)
+            if char_match_found is True: 
+                elements_matched.append(search_chars.lower())
+                # exit with a match (if found)
+                return (format_word(input_word, search_chars), char_match_found,
+                        elements_matched)
+                
+    # Try for 2-char matches (accepting previously used matches) 
+    for i in range(1, len(list_of_chars)):  # get a 2 char search term
+        search_chars: str = list_of_chars[i - 1] + list_of_chars[i]
+        char_match_found, matched_element = is_element(search_chars)
+        if char_match_found is True:
             elements_matched.append(search_chars.lower())
             # exit with a match (if found)
-            return (format_word(input_word, search_chars, matched_element), match_found,
-                    matched_element, elements_matched)
+            return (format_word(input_word, search_chars), char_match_found,
+                    elements_matched)
+
+    # Try for 1-char matches (accepting previously used matches)
+    for i in range(0, len(list_of_chars)):  # try a one char match
+        search_chars: str = list_of_chars[i]
+        char_match_found, matched_element = is_element(search_chars)
+        if char_match_found is True: 
+            elements_matched.append(search_chars.lower())
+            # exit with a match (if found)
+            return (format_word(input_word, search_chars), char_match_found,
+                    elements_matched)
 
     # if we haven't exited by finding a match above:
-    match_found = False
-    matched_element = None
-    return input_word, match_found, matched_element, elements_matched
+    char_match_found = False
+    return input_word, char_match_found, elements_matched
 
 
-def is_element(search_chars):
-    match_found = False
+def is_element(search_chars: str) -> Tuple[bool, Optional[str]]:
+    """
+    Takes an input string and checks if it's in 'elements_list_lower'.
+    :param search chars: two or one char search term
+    :return: char_match_found: bool
+    :return: match_found, the element that was matched
+    """
+    char_match_found = False
     if search_chars.lower() in elements_list_lower:
-        match_found = True
+        char_match_found = True
         matched_element = search_chars.lower()
-        return match_found, matched_element  # if a match is found: is_element
+        return char_match_found, matched_element  # if a match is found: is_element
     else:
         matched_element = None
-        return match_found, matched_element   # if no match is found
+        return char_match_found, matched_element   # if no match is found
 
 
-def format_word(input_word, search_chars, matched_element):
-    matched_element_index = elements_list_lower.index(matched_element.lower())
+def format_word(input_word: str, search_chars: str) -> str:
+    """
+    Takes an input string and a sub-string and highlights where they match using bold green formatting.
+    The capitlisation is taked from the original list of checmical elements (rather than the lower case list
+    that is used when searching for matches). 
+    :param: input_word - the text string to be formatted. 
+    :param: search_chars - used to get the index of the matched term in the elements lists and to split the input word.
+    :return: the reformatted text string.
+    """
+    # get the index of the matched_element in elements_list_lower
+    matched_element_index = elements_list_lower.index(search_chars.lower())
+    
     return (f"[white]{input_word.split(search_chars)[0]}[bold green]{elements_list[matched_element_index]}"
             f"[/bold green]{input_word.split(search_chars)[1]}")
 
 
-def generate_search_order_list(length_of_search_order_list):
+def generate_word_sequence(specified_length: int) -> List:
     """
-       Generates a list, of length len(input_line_as_list) of integers (staring at 0) in random order.
-    These are used to randomize the order the words are sent to word_scan to prevent
+    Generates a list, of specified length, of integers (always including 0) in random order.
+    These are used to randomize the order in which words are sent to word_scan to prevent
     matches being biased towards the front of longer lines of text.
-    :param: length_of_search_order_list
-    :return: search_order_list
+    :param: specified_length
+    :return: word_sequence
     """
-    search_order_list = []
-    while len(search_order_list) < length_of_search_order_list:
-        index_num = random.randint(0, length_of_search_order_list-1)
-        if index_num not in search_order_list:
-            search_order_list.append(index_num)
-    return search_order_list
+    word_sequence: List = []
+    while len(word_sequence) < specified_length:
+        index_num = random.randint(0, specified_length-1)
+        if index_num not in word_sequence:
+            word_sequence.append(int(index_num))
+    return word_sequence
